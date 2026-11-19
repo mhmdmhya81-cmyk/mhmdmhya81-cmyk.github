@@ -1,0 +1,82 @@
+CATEGORIES.forEach(cat => {
+      html += <div class="admin-cat-badge">${cat.emoji} ${cat.title}</div>;
+      const items = menuItems.filter(i => i.category === cat.key);
+      items.forEach(item => {
+        html += 
+          <div class="admin-row">
+            <span class="admin-item-title">${item.name}</span>
+            <input type="number" min="0" step="1" class="admin-price-input" id="price-input-${item.id}" value="${item.price}" />
+            <span style="font-size:0.8rem; color:var(--text-muted);">جنيه</span>
+          </div>
+        ;
+      });
+    });
+
+    body.innerHTML = html;
+    openModal('adminModal');
+  }
+
+  function saveAdminPrices() {
+    const newPrices = {};
+    menuItems.forEach(item => {
+      const input = document.getElementById('price-input-' + item.id);
+      const val = Number(input.value);
+      if (!isNaN(val) && val >= 0) {
+        newPrices[item.id] = val;
+      }
+    });
+
+    const newPin = document.getElementById('newPinField').value.trim();
+    if (newPin.length >= 3) {
+      localStorage.setItem(STORAGE_PIN_KEY, newPin);
+    }
+
+    localStorage.setItem(STORAGE_PRICES_KEY, JSON.stringify(newPrices));
+    loadMenuData();
+    renderMenu();
+    renderFeatured();
+    updateOrderSummaryUI();
+    closeModal('adminModal');
+    showToast('✅ تم حفظ الأسعار الجديدة بنجاح');
+  }
+
+  function resetDefaultPrices() {
+    if (!confirm('هل تريد استعادة جميع الأسعار الافتراضية؟')) return;
+    localStorage.removeItem(STORAGE_PRICES_KEY);
+    loadMenuData();
+    openAdminEditor();
+    renderMenu();
+    renderFeatured();
+    updateOrderSummaryUI();
+    showToast('تمت استعادة الأسعار الافتراضية');
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toastMsg');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) backdrop.classList.remove('open');
+    });
+  });
+
+  loadMenuData();
+  renderFeatured();
+  renderMenu();
+  updateOrderSummaryUI();
+</script>
+
+</body>
+</html>
